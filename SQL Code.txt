@@ -1,0 +1,119 @@
+CREATE SCHEMA `leave_appl` ;
+
+CREATE TABLE `leave_appl`.`access_level` (
+  `access_level_id` INT NOT NULL,
+  `access_level_name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`access_level_id`));
+
+
+CREATE TABLE `leave_appl`.`default_leave` (
+  `position_id` INT NOT NULL,
+  `leave_type_id` INT NOT NULL,
+  `days` INT NOT NULL,
+  PRIMARY KEY (`position_id`, `leave_type_id`));
+
+CREATE TABLE `leave_appl`.`holidays` (
+  `date` DATETIME NOT NULL,
+  `description` VARCHAR(80) NULL,
+  PRIMARY KEY (`date`));
+
+CREATE TABLE `leave_appl`.`leave` (
+  `user_id` INT NOT NULL,
+  `leave_type_id` INT NOT NULL,
+  `days_remaining` DOUBLE NOT NULL,
+  PRIMARY KEY (`user_id`, `leave_type_id`));
+
+CREATE TABLE `leave_appl`.`leave_appn` (
+  `appn_id` INT NOT NULL AUTO_INCREMENT,
+  `leave_type_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `appn_date` DATETIME NOT NULL,
+  `start_date` DATETIME NOT NULL,
+  `end_date` DATETIME NOT NULL,
+  `emp_comments` VARCHAR(255) NULL,
+  `mgr_comments` VARCHAR(255) NULL,
+  `status` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`appn_id`));
+
+CREATE TABLE `leave_appl`.`leave_types` (
+  `leave_type_id` INT NOT NULL AUTO_INCREMENT,
+  `leave_type` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`leave_type_id`));
+
+
+CREATE TABLE `leave_appl`.`ot_claims` (
+  `claim_id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `claim_date` DATETIME NOT NULL,
+  `emp_comments` VARCHAR(255) NULL,
+  `mgr_comments` VARCHAR(255) NULL,
+  `status` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`claim_id`));
+
+
+CREATE TABLE `leave_appl`.`position` (
+  `position_id` INT NOT NULL AUTO_INCREMENT,
+  `access_level_id` INT NOT NULL,
+  `job_title` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`position_id`));
+
+
+CREATE TABLE `leave_appl`.`users` (
+  `user_id` INT NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(255) NOT NULL,
+  `password` VARCHAR(32) NOT NULL,
+  `position_id` INT NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `dob` DATETIME NULL,
+  `phone` VARCHAR(100) NULL,
+  `address` VARCHAR(255) NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `manager_id` INT NULL,
+  `ot_hours` DOUBLE NOT NULL,
+  PRIMARY KEY (`user_id`));
+
+
+ALTER TABLE `leave_appl`.`leave_appn` 
+ADD INDEX `leave_type_id_leave_appn_idx` (`leave_type_id` ASC),
+ADD INDEX `user_id_leave_appn_idx` (`user_id` ASC);
+ALTER TABLE `leave_appl`.`leave_appn` 
+ADD CONSTRAINT `leave_type_id_leave_appn`
+  FOREIGN KEY (`leave_type_id`)
+  REFERENCES `leave_appl`.`leave_types` (`leave_type_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `user_id_leave_appn`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `leave_appl`.`users` (`user_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+
+ALTER TABLE `leave_appl`.`ot_claims` 
+ADD INDEX `user_id_ot_claims_idx` (`user_id` ASC);
+ALTER TABLE `leave_appl`.`ot_claims` 
+ADD CONSTRAINT `user_id_ot_claims`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `leave_appl`.`users` (`user_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+
+ALTER TABLE `leave_appl`.`position` 
+ADD INDEX `access_level_id_position_idx` (`access_level_id` ASC);
+ALTER TABLE `leave_appl`.`position` 
+ADD CONSTRAINT `access_level_id_position`
+  FOREIGN KEY (`access_level_id`)
+  REFERENCES `leave_appl`.`access_level` (`access_level_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+
+ALTER TABLE `leave_appl`.`users` 
+ADD INDEX `position_id_user_id_idx` (`position_id` ASC);
+ALTER TABLE `leave_appl`.`users` 
+ADD CONSTRAINT `position_id_user_id`
+  FOREIGN KEY (`position_id`)
+  REFERENCES `leave_appl`.`position` (`position_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
